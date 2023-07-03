@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
     <RootNamespace>Cynox.ModControl</RootNamespace>
-    <AssemblyName>ModControl</AssemblyName>
+    <AssemblyName>Cynox.ModControl</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Version>2.2.0</Version>
+    <Version>2.3.0</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageId>Cynox.ModControl</PackageId>
     <Authors>Cynox GmbH</Authors>
@@ -13,7 +13,7 @@
     <Description>ModControl is a proprietary communication protocol that is supported by several Cynox products.</Description>
     <RepositoryUrl>https://github.com/Cynox-GmbH/Cynox.ModControl</RepositoryUrl>
     <PackageTags>ModControl; Mod-Control; Camp-Control; CCC; Camp-Control Compact</PackageTags>
-    <PackageReleaseNotes>Initial nuget release.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed assembly info and changed assembly name for consistency.</PackageReleaseNotes>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Title>Cynox ModControl Protocol</Title>

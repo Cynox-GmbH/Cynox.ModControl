@@ -1,9 +1,9 @@
 ﻿namespace Cynox.ModControl.Protocol.Commands
 {
     /// <summary>
-    /// Response to <see cref="GetVersionCommand"/>.
+    /// Response to <see cref="GetProtocolVersionCommand"/>.
     /// </summary>
-    public class GetVersionResponse : ModControlResponse
+    public class GetProtocolVersionResponse : ModControlResponse
     {
         /// <summary>
         /// Protocol version number.
@@ -14,7 +14,7 @@
         /// Creates a new instance and tries to parse the data from the specified <see cref="ModControlFrame"/>.
         /// </summary>
         /// <param name="frame"></param>
-        public GetVersionResponse(ModControlFrame frame) : base(frame)
+        public GetProtocolVersionResponse(ModControlFrame frame) : base(frame)
         {
             if (Error != ResponseError.None)
             {

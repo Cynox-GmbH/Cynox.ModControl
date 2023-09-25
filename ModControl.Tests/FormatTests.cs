@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cynox.ModControl.Protocol;
+﻿using Cynox.ModControl.Protocol;
 using Cynox.ModControl.Protocol.Commands;
 using NUnit.Framework;
 
-namespace ModControlProtocolTests
+namespace ModControlTests
 {
     [TestFixture]
     class FormatTests

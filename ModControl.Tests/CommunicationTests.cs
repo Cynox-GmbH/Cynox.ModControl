@@ -1,15 +1,13 @@
 ﻿// NUnit 3 tests
 // See documentation : https://github.com/nunit/docs/wiki/NUnit-Documentation
 
-using System;
-using System.Collections.Generic;
+using Cynox.IO.Connections;
 using NUnit.Framework;
 using Cynox.ModControl.Devices;
-using Cynox.ModControl.Connections;
 using Cynox.ModControl.Protocol;
 using Cynox.ModControl.Protocol.Commands;
 
-namespace ModControlProtocolTests
+namespace ModControlTests
 {
 	[TestFixture]
 	public class CommunicationTests
@@ -24,15 +22,19 @@ namespace ModControlProtocolTests
 
         #region Setup
 
+        public CommunicationTests()
+        {
+            _Device = new ModControlDevice();
+        }
+
         [OneTimeSetUp]
         public void Setup()
         {
             // Create device and establish connection
-            _Device = new ModControlDevice();
             _Device.Address = DEVICEADDRESS;
 
-            Connect(new TcpConnection(TCPADDRESS, TCPPORT), false);
-            var response = _Device.GetVersion();
+            Assert.DoesNotThrow(() => _Device.Connect(new TcpConnection(TCPADDRESS, TCPPORT)));
+            var response = _Device.GetProtocolVersion();
             Assert.That(response.Error == ResponseError.None, $"Response error: {response.Error}");
             Assert.That(response.Version != 0, $"Unexpected protocol version: {response.Version}");
             TestContext.WriteLine($"Protocol version: {response.Version}");
@@ -40,19 +42,6 @@ namespace ModControlProtocolTests
 
         [OneTimeTearDown]
         public void TearDown()
-        {
-            Disconnect();
-        }
-
-        private void Connect(IModControlConnection connection, bool checkResponse = true)
-        {
-            bool connectResult = _Device.Connect(connection, checkResponse);
-
-            Assert.IsTrue(connectResult, "Serial Port connection failed");
-            Assert.IsTrue(_Device.IsConnected);
-        }
-
-        private void Disconnect()
         {
             _Device.Disconnect();
             Assert.IsFalse(_Device.IsConnected);
@@ -66,7 +55,7 @@ namespace ModControlProtocolTests
         public void ResponseErrorTests() {
             var address = _Device.Address;
             _Device.Address = 99;
-            var result = _Device.GetVersion();
+            var result = _Device.GetProtocolVersion();
             Assert.That(result.Error, Is.EqualTo(ResponseError.Timeout), "Sending command to invalid address should cause timeout");
 
             _Device.Address = address;

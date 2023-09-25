@@ -116,7 +116,7 @@ namespace Cynox.ModControl.Protocol
 
             frame = null;
 
-            if (frameData.Count < OVERHEAD)
+            if (frameData == null || frameData.Count < OVERHEAD)
             {
                 return false;
             }

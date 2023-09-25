@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Cynox.ModControl.Connections;
+using Cynox.IO.Connections;
 using Cynox.ModControl.Devices;
 using Cynox.ModControl.Protocol.Commands;
 using NUnit.Framework;
@@ -16,31 +16,38 @@ namespace ModControlTests
                 Address = 1,
             };
 
+            using IConnection connection = new TcpConnection("192.168.6.155", 1470);
+            
             // Establish connection
-            bool success = device.Connect(new TcpConnection("192.168.6.155", 1470));
-
-            if (success)
+            try
             {
-                var setOutputResponse = device.SetOutput(0, true);
+                device.Connect(connection);
+            }
+            catch (ConnectionException ex)
+            {
+                Debug.WriteLine($"Failed to connect. {ex}");
+                return;
+            }
 
-                // Check if request was successful
-                if (setOutputResponse.Error != ResponseError.None)
-                {
-                    Debug.WriteLine($"Request failed: {setOutputResponse.Error}");
-                }
+            var setOutputResponse = device.SetOutput(0, true);
 
-                var getCounterResponse = device.GetCounter(2);
+            // Check if request was successful
+            if (setOutputResponse.Error != ResponseError.None)
+            {
+                Debug.WriteLine($"Request failed: {setOutputResponse.Error}");
+            }
 
-                // Check if request was successful
-                if (getCounterResponse.Error != ResponseError.None)
-                {
-                    Debug.WriteLine($"Request failed: {getCounterResponse.Error}");
-                }
-                else
-                {
-                    // Log counter value
-                    Debug.WriteLine($"Current counter value for channel {getCounterResponse.Channel} = {getCounterResponse.Value}");
-                }
+            var getCounterResponse = device.GetCounter(2);
+
+            // Check if request was successful
+            if (getCounterResponse.Error != ResponseError.None)
+            {
+                Debug.WriteLine($"Request failed: {getCounterResponse.Error}");
+            }
+            else
+            {
+                // Log counter value
+                Debug.WriteLine($"Current counter value for channel {getCounterResponse.Channel} = {getCounterResponse.Value}");
             }
 
             // Disconnect

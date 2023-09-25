@@ -41,7 +41,7 @@ namespace Cynox.ModControl.Protocol.Commands
         /// <summary>
         /// Error reason not specified / unknown.
         /// </summary>
-        Unknown = 0xFF,
+        Other = 0xFF,
     }
 
     /// <summary>
@@ -82,14 +82,14 @@ namespace Cynox.ModControl.Protocol.Commands
 
                     if (!Enum.IsDefined(typeof(ResponseError), enumValue))
                     {
-                        Error = ResponseError.Unknown;
+                        Error = ResponseError.Other;
                     }
 
                     Error = (ResponseError)enumValue;
                 }
                 else
                 {
-                    Error = ResponseError.Unknown;
+                    Error = ResponseError.Other;
                 }
             }
             else

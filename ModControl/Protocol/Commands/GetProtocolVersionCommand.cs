@@ -5,7 +5,7 @@ namespace Cynox.ModControl.Protocol.Commands
     /// <summary>
     /// Used to request the supported protocol from the device.
     /// </summary>
-	public class GetVersionCommand : IModControlCommand<GetVersionResponse>
+	public class GetProtocolVersionCommand : IModControlCommand<GetProtocolVersionResponse>
     {
         /// <inheritdoc />
         public ModControlCommandCode CommandCode => ModControlCommandCode.GetVersion;
@@ -17,9 +17,9 @@ namespace Cynox.ModControl.Protocol.Commands
         }
 
         /// <inheritdoc />
-        public GetVersionResponse ParseResponse(ModControlFrame frame)
+        public GetProtocolVersionResponse ParseResponse(ModControlFrame frame)
         {
-            return new GetVersionResponse(frame);
+            return new GetProtocolVersionResponse(frame);
         }
     }
 }

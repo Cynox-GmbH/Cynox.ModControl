@@ -34,7 +34,7 @@ namespace Cynox.ModControl.Protocol.Commands
 		GetAllOutputs = 0x04,
 		/// Save = 0x20, // obsolete
 		/// <summary>
-		/// Command code for <see cref="GetVersionCommand"/>
+		/// Command code for <see cref="GetProtocolVersionCommand"/>
 		/// </summary>
 		GetVersion = 0x30,
 		/// <summary>

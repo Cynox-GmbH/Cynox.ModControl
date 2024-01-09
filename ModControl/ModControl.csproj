@@ -14,7 +14,7 @@
     <RepositoryUrl>https://github.com/Cynox-GmbH/Cynox.ModControl</RepositoryUrl>
     <PackageTags>ModControl; Mod-Control; Camp-Control; CCC; Camp-Control Compact</PackageTags>
     <PackageReleaseNotes>Use Cynox.IO.Connections instead of IModControlConnection as communication interface.</PackageReleaseNotes>
-    <IncludeSymbols>True</IncludeSymbols>
+    <IncludeSymbols>False</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Title>Cynox ModControl Protocol</Title>
     <PackageProjectUrl>https://github.com/Cynox-GmbH/Cynox.ModControl</PackageProjectUrl>
@@ -23,9 +23,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <NoWarn>1701;1702</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\README.md">
@@ -35,5 +37,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Cynox.IO.Connections" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
   </ItemGroup>
 </Project>

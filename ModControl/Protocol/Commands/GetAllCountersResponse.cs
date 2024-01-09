@@ -27,9 +27,9 @@ namespace Cynox.ModControl.Protocol.Commands
                 return;
             }
 
-            if (Data.Count % 4 == 0)
+            if (frame.Data.Count % 4 == 0)
             {
-                var counterData = new List<byte>(Data);
+                var counterData = new List<byte>(frame.Data);
 
                 while (counterData.Any())
                 {
@@ -42,6 +42,21 @@ namespace Cynox.ModControl.Protocol.Commands
             {
                 Error = ResponseError.InvalidResponseFormat;
             }
+        }
+
+        /// <summary>
+        /// Creates a mew instance.
+        /// </summary>
+        /// <param name="values"></param>
+        public GetAllCountersResponse(IList<uint> values)
+        {
+            Values = new List<uint>(values);
+        }
+
+        /// <inheritdoc/>
+        public override IList<byte> GetData()
+        {
+            return Values.SelectMany(x => BitConverter.GetBytes(x).Reverse()).ToList();
         }
     }
 }

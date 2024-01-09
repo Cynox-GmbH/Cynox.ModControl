@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Cynox.ModControl.Protocol.Commands
@@ -29,16 +30,22 @@ namespace Cynox.ModControl.Protocol.Commands
                 return;
             }
 
-            if (Data.Count == 5)
+            if (frame.Data.Count == 5)
             {
-                Channel = Data[0];
-                var valueData = Data.GetRange(1, 4).ToArray().Reverse().ToArray();
+                Channel = frame.Data[0];
+                var valueData = frame.Data.GetRange(1, 4).ToArray().Reverse().ToArray();
                 Value = BitConverter.ToUInt32(valueData, 0);
             }
             else
             {
                 Error = ResponseError.InvalidResponseFormat;
             }
+        }
+
+        /// <inheritdoc/>
+        public override IList<byte> GetData()
+        {
+            throw new NotImplementedException();
         }
     }
 }

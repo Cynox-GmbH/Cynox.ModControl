@@ -43,18 +43,18 @@ namespace Cynox.ModControl.Protocol.Commands
                 return;
             }
 
-            if (Data.Count == 1)
+            if (frame.Data.Count == 1)
             {
                 // Altes Format -> 1 Byte für 8 Kanäle 
                 for (var i = 0; i < 8; i++)
                 {
-                    States.Add((Data[0] & (1 << i)) > 0 ? OutPutState.On : OutPutState.Off);
+                    States.Add((frame.Data[0] & (1 << i)) > 0 ? OutPutState.On : OutPutState.Off);
                 }
             } 
-            else if (Data.Count > 1)
+            else if (frame.Data.Count > 1)
             {
                 // Neues Format -> für jeden Kanal ein Byte
-                foreach (byte b in Data) {
+                foreach (byte b in frame.Data) {
                     var state = OutPutState.Off;
                     
                     switch (b) {
@@ -79,6 +79,12 @@ namespace Cynox.ModControl.Protocol.Commands
             {
                 Error = ResponseError.InvalidResponseFormat;
             }
+        }
+
+        /// <inheritdoc/>
+        public override IList<byte> GetData()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

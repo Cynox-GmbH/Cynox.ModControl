@@ -1,4 +1,6 @@
-﻿namespace Cynox.ModControl.Protocol.Commands
+﻿using System.Collections.Generic;
+
+namespace Cynox.ModControl.Protocol.Commands
 {
     /// <summary>
     /// Response to <see cref="GetProtocolVersionCommand"/>.
@@ -21,14 +23,20 @@
                 return;
             }
 
-            if (Data.Count == 1)
+            if (frame.Data.Count == 1)
             {
-                Version = Data[0];
+                Version = frame.Data[0];
             }
             else
             {
                 Error = ResponseError.InvalidResponseFormat;
             }
+        }
+
+        /// <inheritdoc/>
+        public override IList<byte> GetData()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

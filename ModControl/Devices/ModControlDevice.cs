@@ -7,7 +7,6 @@ namespace Cynox.ModControl.Devices
     /// </summary>
     public class ModControlDevice : ModControlBase
     {
-
         /// <summary>
         /// Requests the current counter values for all available channels.
         /// </summary>

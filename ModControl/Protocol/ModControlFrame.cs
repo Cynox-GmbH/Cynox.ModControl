@@ -60,12 +60,14 @@ namespace Cynox.ModControl.Protocol
         /// <param name="data">Payload.</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public ModControlFrame(ushort address, byte commandByte, List<byte> data)
+        public ModControlFrame(ushort address, byte commandByte, IList<byte> data)
         {
+            /*
             if (address == 0x2B00 || address == 0x002B || address == 0x2F00)
             {
                 throw new ArgumentException($"Address {address} is reserved.", nameof(address));
             }
+            */
 
             if (data.Count > MAX_DATA_LENGTH)
             {
@@ -74,7 +76,7 @@ namespace Cynox.ModControl.Protocol
 
             Address = address;
             CommandByte = commandByte;
-            Data = data;
+            Data = data.ToList();
         }
 
         /// <summary>
@@ -132,7 +134,7 @@ namespace Cynox.ModControl.Protocol
                 return false;
             }
 
-            ushort address = BitConverter.ToUInt16(frameData.GetRange(0, 2).ToArray(), 0);
+            ushort address = BitConverter.ToUInt16(frameData.GetRange(0, 2).ToArray().Reverse().ToArray(), 0);
             byte command = frameData[2];
             byte dataLength = frameData[3];
 

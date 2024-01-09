@@ -10,7 +10,7 @@ using Cynox.ModControl.Protocol.Commands;
 namespace ModControlTests
 {
 	[TestFixture]
-	public class CommunicationTests
+	public class IntegrationTests
     {
         // Test config
         private const int DEVICEADDRESS = 1;
@@ -18,14 +18,9 @@ namespace ModControlTests
         private const int TCPPORT = 1470;
         private const ulong EXPECTEDCARDID = 1314081842;
 
-        private ModControlDevice _Device;
+        private ModControlDevice _Device = new();
 
         #region Setup
-
-        public CommunicationTests()
-        {
-            _Device = new ModControlDevice();
-        }
 
         [OneTimeSetUp]
         public void Setup()
@@ -67,6 +62,11 @@ namespace ModControlTests
 
         private class InvalidResponse : ModControlResponse {
             public InvalidResponse(ModControlFrame frame) : base(frame) {
+            }
+
+            public override IList<byte> GetData()
+            {
+                throw new NotImplementedException();
             }
         }
 

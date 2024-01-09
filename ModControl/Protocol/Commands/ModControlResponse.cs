@@ -47,7 +47,7 @@ namespace Cynox.ModControl.Protocol.Commands
     /// <summary>
     /// Base class for all ModControl responses.
     /// </summary>
-	public class ModControlResponse
+	public abstract class ModControlResponse
 	{
         /// <summary>
         /// Indicates the error state of the response.
@@ -55,15 +55,18 @@ namespace Cynox.ModControl.Protocol.Commands
         public ResponseError Error { get; protected set; }
         
         /// <summary>
-        /// Payload data.
+        /// Initializes a new instance of the <see cref="ModControlResponse"/> class.
         /// </summary>
-        public List<byte> Data { get; }
+        protected ModControlResponse()
+        {
+            Error = ResponseError.None;
+        }
 
         /// <summary>
         /// Creates a new instance and tries to parse the data from the specified <see cref="ModControlFrame"/>.
         /// </summary>
         /// <param name="frame"></param>
-        public ModControlResponse(ModControlFrame frame)
+        protected ModControlResponse(ModControlFrame frame)
         {
             if (frame == null)
             {
@@ -71,14 +74,12 @@ namespace Cynox.ModControl.Protocol.Commands
                 return;
             }
 
-            Data = frame.Data;
-
             // If error flag is set, command data contains error code.
             if (frame.CommandByte >= 0b10000000)
             {
-                if (Data.Any())
+                if (frame.Data.Any())
                 {
-                    var enumValue = Data[0];
+                    byte enumValue = frame.Data[0];
 
                     if (!Enum.IsDefined(typeof(ResponseError), enumValue))
                     {
@@ -96,7 +97,12 @@ namespace Cynox.ModControl.Protocol.Commands
             {
                 Error = ResponseError.None;
             }
-            
         }
-	}
+
+        /// <summary>
+        /// Returns the payload data of the response.
+        /// </summary>
+        /// <returns>Payload data.</returns>
+        public abstract IList<byte> GetData();
+    }
 }

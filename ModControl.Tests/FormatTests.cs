@@ -29,7 +29,7 @@ namespace ModControlTests
             
             var frame = new ModControlFrame(1, (byte)ModControlCommandCode.GetAllOutputs, data);
             var response = new GetAllOutputsResponse(frame);
-
+            
             Assert.That(response.Error, Is.EqualTo(ResponseError.None));
             Assert.That(response.States, Has.Count.EqualTo(data.Count));
             Assert.That(response.States[0], Is.EqualTo(GetAllOutputsResponse.OutPutState.Off));

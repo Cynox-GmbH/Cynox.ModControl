@@ -105,6 +105,29 @@ namespace Cynox.ModControl.Protocol.Commands
             Limit = limit;
         }
 
+        /// <summary>
+        /// Tries to create a new <see cref="SetOutputCommand"/> instance by parsing the data from the specified <see cref="ModControlFrame"/>.
+        /// </summary>
+        /// <param name="frame">The <see cref="ModControlFrame"/> to parse.</param>
+        /// <param name="command">The resulting <see cref="SetOutputCommand"/>.</param>
+        /// <returns>True if the parsing was successful, otherwise false.</returns>
+        public static bool TryParse(ModControlFrame frame, out SetOutputCommand command)
+        {
+            command = null;
+
+            if (frame.Data.Count < 2)
+            {
+                return false;
+            }
+
+            byte channel = frame.Data[0];
+            bool state = frame.Data[1] == 1;
+            var limit = frame.Data.Count >= 3 ? (LoadLimit)frame.Data[2] : LoadLimit.DoNotChange;
+
+            command = new SetOutputCommand(channel, state, limit);
+            return true;
+        }
+
         /// <inheritdoc />
         public List<byte> GetData()
         {

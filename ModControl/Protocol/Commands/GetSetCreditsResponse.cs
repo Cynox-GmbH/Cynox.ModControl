@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Cynox.ModControl.Protocol.Commands
@@ -32,14 +33,20 @@ namespace Cynox.ModControl.Protocol.Commands
 				return;
 			}
 
-			if (Data.Count == 4) {
-				Channel = Data[0];
-				Action = (GetSetCreditsCommand.CreditAction)Data[1];
-				var valueData = Data.GetRange(2, 2).ToArray().Reverse().ToArray();
+			if (frame.Data.Count == 4) {
+				Channel = frame.Data[0];
+				Action = (GetSetCreditsCommand.CreditAction)frame.Data[1];
+				var valueData = frame.Data.GetRange(2, 2).ToArray().Reverse().ToArray();
 				Credits = BitConverter.ToUInt16(valueData, 0);
 			} else {
 				Error = ResponseError.InvalidResponseFormat;
 			}
+		}
+
+		/// <inheritdoc/>
+		public override IList<byte> GetData()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

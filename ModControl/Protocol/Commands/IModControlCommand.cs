@@ -1,9 +1,4 @@
-﻿using Cynox.ModControl.Protocol;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Cynox.ModControl.Protocol.Commands
 {
@@ -37,7 +32,11 @@ namespace Cynox.ModControl.Protocol.Commands
 		/// Command code for <see cref="GetProtocolVersionCommand"/>
 		/// </summary>
 		GetVersion = 0x30,
-		/// <summary>
+        /// <summary>
+		/// Requests the serial number of the device.
+		/// </summary>
+        GetSerial = 0x45,
+        /// <summary>
 		/// Command code for <see cref="GetSetCreditsCommand"/>
 		/// </summary>
 		GetSetCredits = 0x50,

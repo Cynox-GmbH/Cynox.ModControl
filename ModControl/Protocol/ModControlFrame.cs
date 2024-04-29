@@ -172,25 +172,25 @@ namespace Cynox.ModControl.Protocol
         /// Updates the CRC using the specified start value.
         /// </summary>
         /// <param name="dataByte"></param>
-        /// <param name="srcCRC">Start value.</param>
+        /// <param name="srcCrc">Start value.</param>
         /// <returns></returns>
-        public static ushort CalcCRC(byte dataByte, ushort srcCRC)
+        public static ushort CalcCRC(byte dataByte, ushort srcCrc)
         {
-            ushort newCRC = srcCRC;
-            newCRC = (ushort)(newCRC ^ dataByte);
+            ushort newCrc = srcCrc;
+            newCrc = (ushort)(newCrc ^ dataByte);
 
             for (ushort i = 8; i > 0; i--)
             {
-                if ((newCRC & 0x0001) != 0)
+                if ((newCrc & 0x0001) != 0)
                 {
-                    newCRC = (ushort)((newCRC >> 1) ^ CRC16POLY);
+                    newCrc = (ushort)((newCrc >> 1) ^ CRC16POLY);
                 }
                 else
                 {
-                    newCRC = (ushort)(newCRC >> 1);
+                    newCrc = (ushort)(newCrc >> 1);
                 }
             }
-            return newCRC;
+            return newCrc;
         }
 
     }

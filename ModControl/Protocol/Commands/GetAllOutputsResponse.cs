@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Cynox.ModControl.Protocol.Commands
 {
@@ -31,6 +32,15 @@ namespace Cynox.ModControl.Protocol.Commands
         public List<OutPutState> States { get; }
 
         /// <summary>
+        /// Created a new instance with defined output states.
+        /// </summary>
+        /// <param name="states"></param>
+        public GetAllOutputsResponse(List<OutPutState> states)
+        {
+            States = states;
+        }
+
+        /// <summary>
         /// Creates a new instance and tries to parse the data from the specified <see cref="ModControlFrame"/>.
         /// </summary>
         /// <param name="frame"></param>
@@ -45,7 +55,7 @@ namespace Cynox.ModControl.Protocol.Commands
 
             if (frame.Data.Count == 1)
             {
-                // Altes Format -> 1 Byte für 8 Kanäle 
+                // Altes Format → 1 Byte für 8 Kanäle 
                 for (var i = 0; i < 8; i++)
                 {
                     States.Add((frame.Data[0] & (1 << i)) > 0 ? OutPutState.On : OutPutState.Off);
@@ -53,7 +63,7 @@ namespace Cynox.ModControl.Protocol.Commands
             } 
             else if (frame.Data.Count > 1)
             {
-                // Neues Format -> für jeden Kanal ein Byte
+                // Neues Format → für jeden Kanal ein Byte
                 foreach (byte b in frame.Data) {
                     var state = OutPutState.Off;
                     
@@ -84,7 +94,30 @@ namespace Cynox.ModControl.Protocol.Commands
         /// <inheritdoc/>
         public override IList<byte> GetData()
         {
-            throw new System.NotImplementedException();
+            var data = new List<byte>();
+            foreach (var state in States)
+            {
+                byte stateValue;
+                
+                switch (state)
+                {
+                    case OutPutState.Off:
+                        stateValue = 0;
+                        break;
+                    case OutPutState.On:
+                        stateValue = 1;
+                        break;
+                    case OutPutState.Overload:
+                        stateValue = 2;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                
+                data.Add(stateValue);
+            }
+
+            return data;
         }
     }
 }

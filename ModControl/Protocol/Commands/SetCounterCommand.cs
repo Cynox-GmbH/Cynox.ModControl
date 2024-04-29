@@ -17,7 +17,7 @@ namespace Cynox.ModControl.Protocol.Commands
         /// <summary>
         /// Desired counter value.
         /// </summary>
-        private UInt32 Value { get; }
+        public UInt32 Value { get; }
 
         /// <inheritdoc />
         public ModControlCommandCode CommandCode => ModControlCommandCode.SetCounter;

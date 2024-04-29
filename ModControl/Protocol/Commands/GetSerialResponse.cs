@@ -1,48 +1,47 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace Cynox.ModControl.Protocol.Commands
 {
     /// <summary>
-    /// Response to <see cref="GetProtocolVersionCommand"/>.
+    /// Response to <see cref="GetSerialCommand"/>.
     /// </summary>
-    public class GetProtocolVersionResponse : ModControlResponse
+    public class GetSerialResponse : ModControlResponse
     {
         /// <summary>
-        /// Protocol version number.
+        /// Serial number of the device.
         /// </summary>
-        public byte Version { get; }
+        public string Serial { get; set; }
 
         /// <inheritdoc />
-        public GetProtocolVersionResponse(byte version)
+        public GetSerialResponse(string serial)
         {
-            Version = version;
+            Serial = serial;
         }
 
         /// <summary>
         /// Creates a new instance and tries to parse the data from the specified <see cref="ModControlFrame"/>.
         /// </summary>
         /// <param name="frame"></param>
-        public GetProtocolVersionResponse(ModControlFrame frame) : base(frame)
+        public GetSerialResponse(ModControlFrame frame) : base(frame)
         {
             if (Error != ResponseError.None)
             {
                 return;
             }
 
-            if (frame.Data.Count == 1)
+            if (frame.Data.Count != 14)
             {
-                Version = frame.Data[0];
+                Error = ResponseError.InvalidParameterFormat;
             }
-            else
-            {
-                Error = ResponseError.InvalidResponseFormat;
-            }
+
+            Serial = Encoding.ASCII.GetString(frame.Data.ToArray());
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override IList<byte> GetData()
         {
-            return new List<byte> { Version };
+            return Encoding.ASCII.GetBytes(Serial);
         }
     }
 }

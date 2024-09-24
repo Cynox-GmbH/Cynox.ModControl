@@ -3,33 +3,25 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Cynox.ModControl.Protocol.Commands;
+using JetBrains.Annotations;
 
 namespace Cynox.ModControl.Protocol
 {
     /// <summary>
     /// Represents a data frame as used in the ModControl protocol.
     /// </summary>
-	public class ModControlFrame
+	[PublicAPI]
+    public class ModControlFrame
     {
-        /// <summary>
-        /// The initial value used for CRC calculations.
-        /// </summary>
-        public const ushort CRCINITIALVALUE = 0xFFFF;
-        
-        /// <summary>
-        /// The polygon used for CRC calculations.
-        /// </summary>
-        public const ushort CRC16POLY = 0xA001;
-        
         /// <summary>
         /// The maximum payload length <see cref="ModControlFrame.Data"/>.
         /// </summary>
-        public const int MAX_DATA_LENGTH = 122;
+        public const int MaxDataLength = 122;
         
         /// <summary>
         /// The frame overhead length including address, command, length and crc.
         /// </summary>
-        public const int OVERHEAD = 2 + 1 + 1 + 2;  // address + command + length + crc
+        protected const int Overhead = 2 + 1 + 1 + 2;  // address + command + length + crc
 
         /// <summary>
         /// The address of the target client.
@@ -69,9 +61,9 @@ namespace Cynox.ModControl.Protocol
             }
             */
 
-            if (data.Count > MAX_DATA_LENGTH)
+            if (data.Count > MaxDataLength)
             {
-                throw new ArgumentOutOfRangeException(nameof(data), $"Maximum frameData length of {MAX_DATA_LENGTH} bytes exceeded.");
+                throw new ArgumentOutOfRangeException(nameof(data), data.Count, $"Maximum payload data length is {MaxDataLength} bytes.");
             }
 
             Address = address;
@@ -89,9 +81,15 @@ namespace Cynox.ModControl.Protocol
         /// <summary>
         /// Returns the raw data of the frame.
         /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if <see cref="Data"/> exceeds the maximum range <see cref="MaxDataLength"/>.</exception>
         /// <returns></returns>
         public List<byte> GetData()
         {
+            if (Data.Count > MaxDataLength)
+            {
+                throw new InvalidOperationException($"Maximum payload data length exceeded.");
+            }
+
             var data = new List<byte>();
 
             data.AddRange(BitConverter.GetBytes(Address).Reverse());
@@ -99,7 +97,7 @@ namespace Cynox.ModControl.Protocol
             data.Add((byte)Data.Count);
             data.AddRange(Data);
 
-            var crc = CalcCRC(data);
+            var crc = CalcCrc(data);
 
             data.AddRange(BitConverter.GetBytes(crc).Reverse());
 
@@ -118,7 +116,7 @@ namespace Cynox.ModControl.Protocol
 
             frame = null;
 
-            if (frameData == null || frameData.Count < OVERHEAD)
+            if (frameData == null || frameData.Count < Overhead)
             {
                 return false;
             }
@@ -126,7 +124,7 @@ namespace Cynox.ModControl.Protocol
             // check CRC
             var crcData = frameData.GetRange(frameData.Count - 2, 2).ToArray().Reverse().ToArray();
             ushort actualCrc = BitConverter.ToUInt16(crcData, 0);
-            ushort expectedCrc = CalcCRC(frameData.GetRange(0, frameData.Count - 2));
+            ushort expectedCrc = CalcCrc(frameData.GetRange(0, frameData.Count - 2));
 
             if (actualCrc != expectedCrc)
             {
@@ -139,7 +137,7 @@ namespace Cynox.ModControl.Protocol
             byte dataLength = frameData[3];
 
             // check if data length fields matches up with total data length
-            if (frameData.Count != OVERHEAD + dataLength)
+            if (frameData.Count != Overhead + dataLength)
             {
                 Debug.WriteLine("Unexpected data length");
                 return false;
@@ -152,17 +150,17 @@ namespace Cynox.ModControl.Protocol
         }
 
         /// <summary>
-        /// Calculates the CRC for the given data using the <see cref="CRCINITIALVALUE"/> as start value.
+        /// Calculates the CRC for the given data.
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static ushort CalcCRC(List<byte> data)
+        public static ushort CalcCrc(List<byte> data)
         {
-            ushort value = CRCINITIALVALUE;
+            ushort value = 0xFFFF;
 
             foreach (var b in data)
             {
-                value = CalcCRC(b, value);
+                value = CalcCrc(b, value);
             }
 
             return value;
@@ -174,7 +172,7 @@ namespace Cynox.ModControl.Protocol
         /// <param name="dataByte"></param>
         /// <param name="srcCrc">Start value.</param>
         /// <returns></returns>
-        public static ushort CalcCRC(byte dataByte, ushort srcCrc)
+        private static ushort CalcCrc(byte dataByte, ushort srcCrc)
         {
             ushort newCrc = srcCrc;
             newCrc = (ushort)(newCrc ^ dataByte);
@@ -183,7 +181,7 @@ namespace Cynox.ModControl.Protocol
             {
                 if ((newCrc & 0x0001) != 0)
                 {
-                    newCrc = (ushort)((newCrc >> 1) ^ CRC16POLY);
+                    newCrc = (ushort)((newCrc >> 1) ^ 0xA001);
                 }
                 else
                 {

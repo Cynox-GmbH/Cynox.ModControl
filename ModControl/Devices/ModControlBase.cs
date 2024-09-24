@@ -7,23 +7,25 @@ using Cynox.IO.Connections;
 using Timer = System.Timers.Timer;
 using Cynox.ModControl.Protocol;
 using Cynox.ModControl.Protocol.Commands;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Cynox.ModControl.Devices
 {
-	/// <summary>
-	/// Represents the base device for Mod-Control-Protocol based communication.
-	/// </summary>
-	public class ModControlBase
+    /// <summary>
+    /// Represents the base device for Mod-Control-Protocol based communication.
+    /// </summary>
+    [PublicAPI]
+    public class ModControlBase
     {
-        private static readonly object _ConnectionLock = new object();
-        private IConnection _Connection;
-        private readonly List<byte> _ReceiveBuffer;
-        private readonly Timer _ResponseTimeout;
-        private readonly Timer _ReceiveTimeout;
-        private readonly EventWaitHandle _ReceiveWaitHandle;
-        private int _RetryCount = 3;
+        private static readonly object ConnectionLock = new object();
+        private IConnection _connection;
+        private readonly List<byte> _receiveBuffer;
+        private readonly Timer _responseTimeout;
+        private readonly Timer _receiveTimeout;
+        private readonly EventWaitHandle _receiveWaitHandle;
+        private int _retryCount = 3;
 
         /// <summary>
         /// Logger.
@@ -35,9 +37,9 @@ namespace Cynox.ModControl.Devices
         /// </summary>
         public bool IsConnected {
             get {
-                lock (_ConnectionLock)
+                lock (ConnectionLock)
                 {
-                    return _Connection != null && _Connection.IsConnected;
+                    return _connection != null && _connection.IsConnected;
                 }
             }
         }
@@ -58,11 +60,11 @@ namespace Cynox.ModControl.Devices
         /// Number of automatic retries in case no valid response was received.
         /// </summary>
         public int RetryCount {
-            get => _RetryCount;
+            get => _retryCount;
             set {
                 if (value > 0 && value <= 10)
                 {
-                    _RetryCount = value;
+                    _retryCount = value;
                 }
             }
         }
@@ -74,17 +76,17 @@ namespace Cynox.ModControl.Devices
         {
             Logger = logger ?? NullLogger<ModControlBase>.Instance;
 
-            _ResponseTimeout = new Timer();
-            _ResponseTimeout.AutoReset = false;
-            _ResponseTimeout.Elapsed += ResponseTimeoutOnElapsed;
+            _responseTimeout = new Timer();
+            _responseTimeout.AutoReset = false;
+            _responseTimeout.Elapsed += ResponseTimeoutOnElapsed;
 
-            _ReceiveTimeout = new Timer(100);
-            _ReceiveTimeout.AutoReset = false;
-            _ReceiveTimeout.Elapsed += ReceiveTimeoutOnElapsed;
+            _receiveTimeout = new Timer(100);
+            _receiveTimeout.AutoReset = false;
+            _receiveTimeout.Elapsed += ReceiveTimeoutOnElapsed;
 
-            _ReceiveBuffer = new List<byte>();
+            _receiveBuffer = new List<byte>();
 
-            _ReceiveWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+            _receiveWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
         }
 
         /// <summary>
@@ -104,30 +106,30 @@ namespace Cynox.ModControl.Devices
                 throw new ArgumentNullException(nameof(connection));
             }
 
-            lock (_ConnectionLock)
+            lock (ConnectionLock)
             {
                 // ggf. alte connection entfernen und neue zuweisen
-                if (connection != _Connection)
+                if (connection != _connection)
                 {
                     Disconnect();
 
-                    if (_Connection != null)
+                    if (_connection != null)
                     {
-                        _Connection.DataReceived -= ConnectionOnDataReceived;
-                        _Connection = null;
+                        _connection.DataReceived -= ConnectionOnDataReceived;
+                        _connection = null;
                     }
 
-                    _Connection = connection;
-                    _Connection.DataReceived += ConnectionOnDataReceived;
+                    _connection = connection;
+                    _connection.DataReceived += ConnectionOnDataReceived;
                 }
 
-                if (_Connection.IsConnected)
+                if (_connection.IsConnected)
                 {
                     Logger.LogDebug("Already connected");
                     return;
                 }
 
-                _Connection.Connect();
+                _connection.Connect();
             }
 
             Logger.LogInformation("Connected");
@@ -154,10 +156,10 @@ namespace Cynox.ModControl.Devices
         /// <exception cref="ConnectionException">if an error occurred while closing the connection.</exception>
         public void Disconnect()
         {
-            lock (_ConnectionLock)
+            lock (ConnectionLock)
             {
                 Logger.LogInformation("Disconnecting...");
-            _Connection?.Disconnect();
+            _connection?.Disconnect();
                 Logger.LogInformation("Disconnected");
             }
         }
@@ -170,19 +172,19 @@ namespace Cynox.ModControl.Devices
         /// <exception cref="ConnectionException"></exception>
         protected void Send(IEnumerable<byte> data)
         {
-            lock (_ConnectionLock)
+            lock (ConnectionLock)
             {
-                if (_Connection == null)
+                if (_connection == null)
                 {
                     throw new InvalidOperationException("No connection available");
                 }
 
-                if (!_Connection.IsConnected)
+                if (!_connection.IsConnected)
                 {
                     throw new InvalidOperationException("Not connected");
                 }
 
-                _Connection.Send(data.ToList());
+                _connection.Send(data.ToList());
             }
         }
 
@@ -197,20 +199,20 @@ namespace Cynox.ModControl.Devices
         {
             Logger.LogDebug($"Sending request (timeout = {timeout})...");
 
-            _ReceiveBuffer.Clear();
-            _ReceiveTimeout.Stop();
-            _ResponseTimeout.Interval = timeout;
-            _ResponseTimeout.Start();
-            _ReceiveWaitHandle.Reset();
+            _receiveBuffer.Clear();
+            _receiveTimeout.Stop();
+            _responseTimeout.Interval = timeout;
+            _responseTimeout.Start();
+            _receiveWaitHandle.Reset();
 
             Send(data);
 
             int tickStart = Environment.TickCount;
 
-            _ReceiveWaitHandle.WaitOne(timeout + 1000); // Fallback timeout just in case if handle doesn't get set.
+            _receiveWaitHandle.WaitOne(timeout + 1000); // Fallback timeout just in case if handle doesn't get set.
 
-            Logger.LogTrace($"Received {_ReceiveBuffer.Count} byte(s). Completed after {Environment.TickCount - tickStart}ms.");
-            return _ReceiveBuffer;
+            Logger.LogTrace($"Received {_receiveBuffer.Count} byte(s). Completed after {Environment.TickCount - tickStart}ms.");
+            return _receiveBuffer;
         }
 
         /// <summary>
@@ -292,25 +294,25 @@ namespace Cynox.ModControl.Devices
         {
             Logger.LogTrace("ConnectionOnDataReceived()");
 
-            _ResponseTimeout.Stop();
-            _ReceiveTimeout.Stop();
-            _ReceiveTimeout.Start();
+            _responseTimeout.Stop();
+            _receiveTimeout.Stop();
+            _receiveTimeout.Start();
 
-            _ReceiveBuffer.AddRange(e.Data);
+            _receiveBuffer.AddRange(e.Data);
         }
 
         private void ReceiveTimeoutOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             Logger.LogTrace("No more data expected.");
-            _ReceiveTimeout.Stop();
-            _ReceiveWaitHandle.Set();
+            _receiveTimeout.Stop();
+            _receiveWaitHandle.Set();
         }
 
         private void ResponseTimeoutOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             Logger.LogTrace("Device not responding.");
-            _ResponseTimeout.Stop();
-            _ReceiveWaitHandle.Set();
+            _responseTimeout.Stop();
+            _receiveWaitHandle.Set();
         }
 
         /// <summary>

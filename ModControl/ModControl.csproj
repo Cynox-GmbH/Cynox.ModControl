@@ -5,7 +5,7 @@
     <RootNamespace>Cynox.ModControl</RootNamespace>
     <AssemblyName>Cynox.ModControl</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Version>3.1.0</Version>
+    <Version>3.2.0</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageId>Cynox.ModControl</PackageId>
     <Authors>Cynox GmbH</Authors>
@@ -38,6 +38,6 @@
   <ItemGroup>
     <PackageReference Include="Cynox.IO.Connections" Version="1.0.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
   </ItemGroup>
 </Project>

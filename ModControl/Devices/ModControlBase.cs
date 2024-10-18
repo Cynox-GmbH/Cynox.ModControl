@@ -19,6 +19,11 @@ namespace Cynox.ModControl.Devices
     [PublicAPI]
     public class ModControlBase
     {
+        /// <summary>
+        /// Optional <see cref="ILoggerFactory"/>, used to provide additional logging from internal classes and static members.
+        /// </summary>
+        public static ILoggerFactory LogFactory { get; set; }
+
         private static readonly object ConnectionLock = new object();
         private IConnection _connection;
         private readonly List<byte> _receiveBuffer;
@@ -74,7 +79,7 @@ namespace Cynox.ModControl.Devices
         /// </summary>
         public ModControlBase(ILogger<ModControlBase> logger = null)
         {
-            Logger = logger ?? NullLogger<ModControlBase>.Instance;
+            Logger = logger ?? LogFactory?.CreateLogger<ModControlBase>() ?? NullLogger<ModControlBase>.Instance;
 
             _responseTimeout = new Timer();
             _responseTimeout.AutoReset = false;
@@ -111,6 +116,7 @@ namespace Cynox.ModControl.Devices
                 // ggf. alte connection entfernen und neue zuweisen
                 if (connection != _connection)
                 {
+                    Logger.LogDebug("Discarding previous connection.");
                     Disconnect();
 
                     if (_connection != null)
@@ -123,13 +129,10 @@ namespace Cynox.ModControl.Devices
                     _connection.DataReceived += ConnectionOnDataReceived;
                 }
 
-                if (_connection.IsConnected)
+                if (!_connection.IsConnected)
                 {
-                    Logger.LogDebug("Already connected");
-                    return;
+                    _connection.Connect();
                 }
-
-                _connection.Connect();
             }
 
             Logger.LogInformation("Connected");
@@ -159,7 +162,7 @@ namespace Cynox.ModControl.Devices
             lock (ConnectionLock)
             {
                 Logger.LogInformation("Disconnecting...");
-            _connection?.Disconnect();
+                _connection?.Disconnect();
                 Logger.LogInformation("Disconnected");
             }
         }
@@ -292,8 +295,8 @@ namespace Cynox.ModControl.Devices
 
         private void ConnectionOnDataReceived(object sender, ConnectionDataReceivedEventArgs e)
         {
-            Logger.LogTrace("ConnectionOnDataReceived()");
-
+            Logger.LogTrace("Data received: {data}", e.Data.Aggregate("", (s, b) => s + b.ToString("X2")));
+            
             _responseTimeout.Stop();
             _receiveTimeout.Stop();
             _receiveTimeout.Start();

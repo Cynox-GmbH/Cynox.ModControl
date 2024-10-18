@@ -6,8 +6,26 @@ using NUnit.Framework;
 using Cynox.ModControl.Devices;
 using Cynox.ModControl.Protocol;
 using Cynox.ModControl.Protocol.Commands;
+using Microsoft.Extensions.Logging;
 
 namespace ModControlTests;
+
+public static class Tools
+{
+    public static ILoggerFactory LogFactory { get; }
+
+    static Tools()
+    {
+        LogFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddFilter("Microsoft", LogLevel.Warning)
+                .ClearProviders()
+                .AddFilter("System", LogLevel.Warning)
+                .SetMinimumLevel(LogLevel.Trace)
+                .AddDebug();
+        });
+    }
+}
 
 [TestFixture]
 public class IntegrationTests
@@ -18,13 +36,15 @@ public class IntegrationTests
     private const int TcpPort = 1470;
     private const ulong ExpectedCardId = 1314081842;
 
-    private readonly ModControlDevice _device = new();
+    private readonly ModControlDevice _device = new(Tools.LogFactory.CreateLogger<ModControlBase>());
 
     #region Setup
 
     [OneTimeSetUp]
     public void Setup()
     {
+        ModControlBase.LogFactory = Tools.LogFactory;
+
         // Create device and establish connection
         _device.Address = DeviceAddress;
 

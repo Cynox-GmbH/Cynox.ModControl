@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using Cynox.ModControl.Devices;
 using Cynox.ModControl.Protocol.Commands;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Cynox.ModControl.Protocol
 {
@@ -44,6 +46,8 @@ namespace Cynox.ModControl.Protocol
         /// </summary>
         public ModControlCommandCode CommandCode => (ModControlCommandCode)(CommandByte & 0b01111111);
 
+        private ILogger<ModControlFrame> _logger;
+
         /// <summary>
         /// Creates a new instance from scratch.
         /// </summary>
@@ -54,6 +58,8 @@ namespace Cynox.ModControl.Protocol
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public ModControlFrame(ushort address, byte commandByte, IList<byte> data)
         {
+            _logger = ModControlBase.LogFactory?.CreateLogger<ModControlFrame>() ?? NullLogger<ModControlFrame>.Instance;
+
             /*
             if (address == 0x2B00 || address == 0x002B || address == 0x2F00)
             {
@@ -87,7 +93,7 @@ namespace Cynox.ModControl.Protocol
         {
             if (Data.Count > MaxDataLength)
             {
-                throw new InvalidOperationException($"Maximum payload data length exceeded.");
+                throw new InvalidOperationException("Maximum payload data length exceeded.");
             }
 
             var data = new List<byte>();
@@ -112,15 +118,17 @@ namespace Cynox.ModControl.Protocol
         /// <returns></returns>
         public static bool TryParse(List<byte> frameData, out ModControlFrame frame)
         {
-            Debug.WriteLine($"TryParse {nameof(ModControlFrame)}");
+            var logger = ModControlBase.LogFactory?.CreateLogger<ModControlFrame>() ?? NullLogger<ModControlFrame>.Instance;
+            logger.LogTrace("Parsing {byteCount} bytes", frameData?.Count.ToString() ?? "null");
 
             frame = null;
 
             if (frameData == null || frameData.Count < Overhead)
             {
+                logger.LogWarning("Incomplete frame");
                 return false;
             }
-
+            
             // check CRC
             var crcData = frameData.GetRange(frameData.Count - 2, 2).ToArray().Reverse().ToArray();
             ushort actualCrc = BitConverter.ToUInt16(crcData, 0);
@@ -128,7 +136,7 @@ namespace Cynox.ModControl.Protocol
 
             if (actualCrc != expectedCrc)
             {
-                Debug.WriteLine("CRC mismatch");
+                logger.LogWarning("CRC mismatch");
                 return false;
             }
 
@@ -139,12 +147,14 @@ namespace Cynox.ModControl.Protocol
             // check if data length fields matches up with total data length
             if (frameData.Count != Overhead + dataLength)
             {
-                Debug.WriteLine("Unexpected data length");
+                logger.LogWarning("Data length does not correspond to frame length.");
                 return false;
             }
 
             var data = frameData.GetRange(4, dataLength);
             frame = new ModControlFrame(address, command, data);
+
+            logger.LogTrace("Parsing successful");
 
             return true;
         }

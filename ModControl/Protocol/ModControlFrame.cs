@@ -52,6 +52,16 @@ namespace Cynox.ModControl.Protocol
         /// Creates a new instance from scratch.
         /// </summary>
         /// <param name="address">Target client address.</param>
+        /// <param name="command">The <see cref="ModControlCommandCode"/>.</param>
+        /// <param name="data">Payload.</param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public ModControlFrame(ushort address, ModControlCommandCode command, IList<byte> data) : this(address, (byte)command, data) { }
+
+        /// <summary>
+        /// Creates a new instance from scratch.
+        /// </summary>
+        /// <param name="address">Target client address.</param>
         /// <param name="commandByte">Command code</param>
         /// <param name="data">Payload.</param>
         /// <exception cref="ArgumentException"></exception>

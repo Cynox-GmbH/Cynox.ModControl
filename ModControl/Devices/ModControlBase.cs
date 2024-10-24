@@ -116,11 +116,10 @@ namespace Cynox.ModControl.Devices
                 // ggf. alte connection entfernen und neue zuweisen
                 if (connection != _connection)
                 {
-                    Logger.LogDebug("Discarding previous connection.");
-                    Disconnect();
-
                     if (_connection != null)
                     {
+                        Logger.LogDebug("Discarding previous connection.");
+                        Disconnect();
                         _connection.DataReceived -= ConnectionOnDataReceived;
                         _connection = null;
                     }
@@ -235,9 +234,23 @@ namespace Cynox.ModControl.Devices
 
             var data = SendRequest(frame.GetData(), timeout);
 
-            if (!ModControlFrame.TryParse(data, out ModControlFrame response))
+            if (!ModControlFrame.TryParse(data, out var response))
             {
                 Logger.LogError("ModControlFrame.TryParse() failed");
+            }
+            else
+            {
+                if (frame.CommandCode != response?.CommandCode)
+                {
+                    Logger.LogWarning("Response does not match request command.");
+                    response = null;
+                }
+
+                if (frame.Address != response?.Address)
+                {
+                    Logger.LogWarning("Response does not match request address.");
+                    response = null;
+                }
             }
 
             return response;

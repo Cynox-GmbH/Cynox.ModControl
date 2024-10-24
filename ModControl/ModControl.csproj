@@ -5,7 +5,7 @@
     <RootNamespace>Cynox.ModControl</RootNamespace>
     <AssemblyName>Cynox.ModControl</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Version>3.2.0</Version>
+    <Version>3.2.1</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageId>Cynox.ModControl</PackageId>
     <Authors>Cynox GmbH</Authors>
